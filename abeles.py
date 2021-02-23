@@ -27,6 +27,7 @@ class Matrix(object):
                               [0, 1]], complex)  # Abeles matrix for transverse-magnetic(TM) or p-polarized ray
 
     def set(self, theta, n, lambda_const=1, lambda_var=1):
+        assert abs(theta) < mt.pi / 2 and n > 0 and lambda_const > 0 and lambda_var > 0, 'Wrong parameters'
         # set Abeles matrix of layer for TE-polarization
         self.m_te[0][0] = complex(mt.cos(_beta(theta, n, lambda_const, lambda_var)), 0)
         self.m_te[0][1] = complex(0, - mt.sin(_beta(theta, n, lambda_const, lambda_var)) / _p(theta, n))
@@ -45,10 +46,12 @@ class Matrix(object):
                               [0, 1]], complex)  # unit matrix for transverse-magnetic(TM) or p-polarized ray
 
     def multiply(self, matrix):
+        assert isinstance(matrix, Matrix), 'Input object isn\'t a Matrix instance'
         self.m_te = self.m_te @ matrix.m_te
         self.m_tm = self.m_tm @ matrix.m_tm
 
     def t_te(self, theta: float, n_air: float, n_ground: float) -> complex:
+        assert abs(theta) < mt.pi / 2 and n_air > 0 and n_ground > 0, 'Wrong parameters'
         # transmittance coefficient for TE-polarization
         return 2 * _p(theta, n_air) / (self.m_te[0][0] * _p(theta, n_air)
                                        + self.m_te[1][1] * _p(theta, n_ground)
@@ -56,6 +59,7 @@ class Matrix(object):
                                        + self.m_te[1][0])
 
     def t_tm(self, theta: float, n_air: float, n_ground: float) -> complex:
+        assert abs(theta) < mt.pi / 2 and n_air > 0 and n_ground > 0, 'Wrong parameter'
         # transmittance coefficient for TM-polarization
         return 2 * _q(theta, n_air) / (self.m_tm[0][0] * _q(theta, n_air)
                                        + self.m_tm[1][1] * _q(theta, n_ground)
@@ -66,6 +70,7 @@ class Matrix(object):
 class Mirror(object):
     """Abeles matrix for dielectric mirror"""
     def __init__(self, theta, n_ground, n_high, n_low):
+        assert abs(theta) < mt.pi / 2 and n_ground > 0 and n_high >= n_low > 0, 'Wrong parameters'
         self.theta: float = theta  # angle between ray and perpendicular to mirror's surface
         self.n_air: float = 1  # refractive index of air
         self.n_ground: float = n_ground  # refractive index of ground layer
